@@ -18,5 +18,5 @@ if __name__ == "__main__":
 	pyspark_results = pyspark_APDS(pre_processed_data)
 	print(pyspark_results) 
  
-	os.system('./spark-3.4.0-bin-hadoop3/sbin/stop-worker.sh')
-	os.system('./spark-3.4.0-bin-hadoop3/sbin/stop-master.sh')
+	os.system('../../spark-3.4.0-bin-hadoop3/sbin/stop-worker.sh')
+	os.system('../../spark-3.4.0-bin-hadoop3/sbin/stop-master.sh')

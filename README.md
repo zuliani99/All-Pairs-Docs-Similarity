@@ -17,6 +17,13 @@ pip install ipywidgets
 
 
 ## Start Application
+Start *PySpark* typing:
+```console
+./spark-3.4.0-bin-hadoop3/bin/pyspark
+```
+
+And memorize the location of HOST:PORT of the local server
+
 Simulate a cluster on a single machine:
 
 ```console
