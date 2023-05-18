@@ -24,8 +24,8 @@ def reduce_fun(doc_id_doc_list):
 def pyspark_APDS(pre_processed_data):
 	# Create SparkSession 
 	spark = SparkSession.builder \
-		.master('local[1]') \
-		.config("spark.driver.memory", "15g") \
+		.master('local[*]') \
+		.config("spark.driver.memory", "10g") \
 		.appName("all_pairs_docs_similarity.com") \
 		.getOrCreate()
 

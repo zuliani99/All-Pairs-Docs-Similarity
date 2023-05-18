@@ -10,9 +10,9 @@ if __name__ == "__main__":
     
 	pre_processed_data = {dataset: documents_preprocessing(dataset, docs_dict) for dataset, docs_dict in datasets_data.items()}
 
-	result_classic, result_np = squential_APDS(pre_processed_data) 
-	print('\nClassic Sequential Version Result: ', result_classic)
-	print('\nNumpy Sequential Version Result: ', result_np)
+	#result_classic, result_np = squential_APDS(pre_processed_data) 
+	#print('\nClassic Sequential Version Result: ', result_classic)
+	#print('\nNumpy Sequential Version Result: ', result_np)
 
 	print('\n\n')
 	pyspark_results = pyspark_APDS(pre_processed_data)
