@@ -33,14 +33,12 @@ Simulate a cluster on a single machine:
 After launching the master node as above, its web user interface is available at *http://localhost:8080/* Then you can launch as many workers using as the spark://HOST:PORT the main url reported on the web UI ( above the Alive Workers entry)
 
 ```console
-export SPARK_WORKER_INSTANCES=X; ./spark-3.4.0-bin-hadoop3/sbin/start-worker.sh spark://HOST:PORT
+export SPARK_WORKER_INSTANCES=4; ./spark-3.4.0-bin-hadoop3/sbin/start-worker.sh spark://riccardo-HP-EliteBook-840-G2:7077
 ```
-With `X` the number of worker you would like to run the benchmark 
 
 Now you can launch a script on the cluster you just created, and monitor its advance on the master web UI:
 ```console
-./spark-3.4.0-bin-hadoop3/bin/spark-submit --master spark://HOST:PORT
-.app/main.py
+./spark-3.4.0-bin-hadoop3/bin/spark-submit --master spark://riccardo-HP-EliteBook-840-G2:7077 ./All-Pairs-Docs-Similarity/app/main.py
 ```
 
 ## Results

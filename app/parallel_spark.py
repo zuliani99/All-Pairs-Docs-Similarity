@@ -8,16 +8,18 @@ import numpy as np
 def pyspark_APDS(pre_processed_data):
     # Create SparkSession 
     spark = SparkSession.builder \
-    	.master('local[*]') \
-    	.config("spark.driver.memory", "10g") \
+        .master("local[*]") \
+    	.config("spark.driver.memory", "6g") \
+        .config("spark.executor.memory", "6g") \
     	.appName("all_pairs_docs_similarity.com") \
     	.getOrCreate()
-
+    
     sc = spark.sparkContext
+    
 
     results = {}
     
-    considered_docs = 50
+    #considered_docs = 50
     
     # Map functuion
     def map_fun(pair):
@@ -47,10 +49,10 @@ def pyspark_APDS(pre_processed_data):
 
         # Create the features and columns vectors
         vectorizer = TfidfVectorizer()
-        tfidf_features = vectorizer.fit_transform(list(docs_list.values())[:considered_docs])
+        tfidf_features = vectorizer.fit_transform(list(docs_list.values())) #[:considered_docs]
         
         dict_pre_rrd = list(
-        	zip(list(docs_list.keys())[:considered_docs], tfidf_features.toarray())
+        	zip(list(docs_list.keys()), tfidf_features.toarray()) #[:considered_docs]
         )
         
         d_star = np.max(tfidf_features.toarray().T, axis=1)
@@ -59,14 +61,13 @@ def pyspark_APDS(pre_processed_data):
         for doc_id, doc_tfidf in dict_pre_rrd:
             temp_product_sum = 0  
             sorted_indices = np.argsort(doc_tfidf)
-            sorted_tfidf = sorted(doc_tfidf)  
-            for termid, tfidf in zip(sorted_indices, sorted_tfidf):
-                temp_product_sum += tfidf * d_star[termid]
+            for termid in sorted_indices:
+                temp_product_sum += doc_tfidf[termid] * d_star[termid]
                 if temp_product_sum >= threshold:
                     b_d[doc_id] = termid - 1
                     break
 
-        rdd = sc.parallelize(dict_pre_rrd)
+        rdd = sc.parallelize(dict_pre_rrd, numSlices=100)
 
         print('\nDebug Print of the first rdd value')
         print(rdd.first())
@@ -82,10 +83,11 @@ def pyspark_APDS(pre_processed_data):
         #reduced = mapped.reduceByKey(reduce_fun)
         reduced = grouppedby.flatMap(reduce_fun)
         print('\nDebug Print of the first reduced values')
-        reduced_results = reduced.collect()
-        print(reduced_results)
         
         reduced.cache()
+        
+        reduced_results = reduced.collect()
+        print(reduced_results)
 
         results[datasets_name] = reduced_results
 
