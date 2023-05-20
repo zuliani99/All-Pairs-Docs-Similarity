@@ -14,7 +14,7 @@ if __name__ == "__main__":
 	#print('\nClassic Sequential Version Result: ', result_classic)
 	#print('\nNumpy Sequential Version Result: ', result_np)
 
-	print('\n\n')
+	#print('\n\n')
 	pyspark_results = pyspark_APDS(pre_processed_data)
 	print(pyspark_results) 
  

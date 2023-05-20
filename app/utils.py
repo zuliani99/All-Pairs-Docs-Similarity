@@ -14,8 +14,8 @@ import pandas as pd
 import spacy
 
 
-threshold = 0.05 # Choosen threshold
-#threshold = 0.8 # Choosen threshold
+#threshold = 0.05 # Choosen threshold
+threshold = 0.8 # Choosen threshold
 
 
 nlp = spacy.load('en_core_web_sm')

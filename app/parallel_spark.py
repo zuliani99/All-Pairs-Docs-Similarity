@@ -20,7 +20,7 @@ def pyspark_APDS(pre_processed_data):
 
     results = {}
     
-    considered_docs = 50
+    #considered_docs = 50
     
     # Map functuion
     def map_fun(pair):
@@ -52,10 +52,10 @@ def pyspark_APDS(pre_processed_data):
 
         # Create the features and columns vectors
         vectorizer = TfidfVectorizer()
-        tfidf_features = vectorizer.fit_transform(list(docs_list.values())[:considered_docs]) #[:considered_docs]
+        tfidf_features = vectorizer.fit_transform(list(docs_list.values())) #[:considered_docs]
         
         dict_pre_rrd1 = list(
-        	zip(list(docs_list.keys())[:considered_docs], tfidf_features.toarray()) #[:considered_docs]
+        	zip(list(docs_list.keys()), tfidf_features.toarray()) #[:considered_docs]
         )
         
         dict_pre_rrd2 = [
@@ -69,6 +69,7 @@ def pyspark_APDS(pre_processed_data):
         #print('d_star', d_star)
         
         b_d = {}
+        print('\nComputing b_d')
         for doc_id, doc_tfidf in dict_pre_rrd1:
             temp_product_sum = 0  
             sorted_indices = np.argsort(doc_tfidf)
@@ -77,10 +78,11 @@ def pyspark_APDS(pre_processed_data):
                 if temp_product_sum >= threshold:
                     b_d[doc_id] = termid - 1
                     break
-        print('b_d', b_d)
+        print(' DONE')
+        #print('b_d', b_d)
         
         print('\nRDD creation...')
-        rdd = sc.parallelize(dict_pre_rrd1)#, numSlices=100)
+        rdd = sc.parallelize(dict_pre_rrd1, numSlices=100)
         #rdd = sc.parallelize(dict_pre_rrd2)#, numSlices=100)
         print(' DONE')
 
