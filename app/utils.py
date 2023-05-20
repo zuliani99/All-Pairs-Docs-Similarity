@@ -10,11 +10,11 @@ except ModuleNotFoundError:
     from tqdm import tqdm
     
 import pandas as pd
-
 import spacy
 
 
-#threshold = 0.05 # Choosen threshold
+considered_docs = 50
+#threshold = 0.1 # Choosen threshold
 threshold = 0.8 # Choosen threshold
 
 

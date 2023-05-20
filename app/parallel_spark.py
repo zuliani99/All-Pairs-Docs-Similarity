@@ -1,13 +1,14 @@
 from pyspark.sql import SparkSession
-from utils import threshold
+from utils import threshold, considered_docs
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import multiprocessing as mp
 import concurrent.futures
+import time
 
 
-def compute_b_d(doc_id, doc_tfidf, d_star, threshold):
+def single_b_d(doc_id, doc_tfidf, d_star, threshold):
     temp_product_sum = 0
     sorted_indices = np.argsort(doc_tfidf)
     for termid in sorted_indices:
@@ -17,22 +18,27 @@ def compute_b_d(doc_id, doc_tfidf, d_star, threshold):
     return doc_id, None
 
 
-def pyspark_APDS(pre_processed_data):
-    
-    # Create SparkSession 
-    spark = SparkSession.builder \
-        .master("local[*]") \
-    	.config("spark.driver.memory", "6g") \
-        .config("spark.executor.memory", "6g") \
-    	.appName("all_pairs_docs_similarity.com") \
-    	.getOrCreate()
-    
-    sc = spark.sparkContext
-    
+def parallel_b_d(list_pre_rrd1, d_star):
+    b_d = {}
+    print('\nComputing b_d')                    
+    num_processes = mp.cpu_count()  # Get the number of CPU cores
+    with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+		# Submit the tasks to the executor
+        futures = [executor.submit(single_b_d, doc_id, doc_tfidf, d_star, threshold)
+				for doc_id, doc_tfidf in list_pre_rrd1]
 
-    results = {}
+		# Process the results as they complete
+        for future in concurrent.futures.as_completed(futures):
+            doc_id, termid_minus_1 = future.result()
+            if termid_minus_1 is not None:
+                b_d[doc_id] = termid_minus_1
     
-    #considered_docs = 50
+    return b_d
+
+
+
+
+def pyspark_APDS(pre_processed_data):
     
     # Map functuion
     def map_fun(pair):
@@ -52,87 +58,94 @@ def pyspark_APDS(pre_processed_data):
         res = []
         for id1, d1 in tf_idf_list:
             for id2, d2 in tf_idf_list:
-                if len(np.intersect1d(d1, d2)) > 0 and term == np.intersect1d(d1, d2).max():
+                if len(np.intersect1d(np.nonzero(d1), np.nonzero(d2))) > 0 and term == np.intersect1d(np.nonzero(d1), np.nonzero(d2)).max():
                     if cosine_similarity([d1], [d2])[0][0] >= threshold and id1 != id2:
-                        res.append([id1, id2, cosine_similarity([d1], [d2])[0][0]])
+                        res.append((id1, id2, cosine_similarity([d1], [d2])[0][0]))
         return res
+    
+    
+    
+    # Create SparkSession 
+    spark = SparkSession.builder \
+        .master("local[*]") \
+    	.config("spark.driver.memory", "6g") \
+        .config("spark.executor.memory", "6g") \
+    	.appName("all_pairs_docs_similarity.com") \
+    	.getOrCreate()
+    
+    sc = spark.sparkContext
+    
+
+    results = {}
     
 
     for datasets_name, docs_list in pre_processed_data.items():
         
         print(f'\nPyspark All Documents Pairs Similarities - {datasets_name}')
+        
+        tfidf_features = 0
+        list_pre_rrd1 = []
 
-        # Create the features and columns vectors
+        # Create the features and columns vectors and list of key value pairs
         vectorizer = TfidfVectorizer()
-        tfidf_features = vectorizer.fit_transform(list(docs_list.values())) #[:considered_docs]
         
-        list_pre_rrd1 = list(
-        	zip(list(docs_list.keys()), tfidf_features.toarray()) #[:considered_docs]
-        )
-        
-        dict_pre_rrd2 = [
-            ('ciao', np.random.rand(6)),
-            ('MARIO', np.random.rand(6)),
-            ('CAIO', np.random.rand(6))
-        ]
-        
+        if considered_docs is not None:
+            tfidf_features = vectorizer.fit_transform(list(docs_list.values())[:considered_docs])
+            list_pre_rrd1 = list(
+         		zip(list(docs_list.keys())[:considered_docs], tfidf_features.toarray())
+        	)
+        else:
+            tfidf_features = vectorizer.fit_transform(list(docs_list.values()))
+            list_pre_rrd1 = list(zip(list(docs_list.keys()), tfidf_features.toarray()))
         
         d_star = np.max(tfidf_features.toarray().T, axis=1)
-        #print('d_star', d_star)
         
-        b_d = {}
-        print('\nComputing b_d')                    
-        num_processes = mp.cpu_count()  # Get the number of CPU cores
-        with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
-			# Submit the tasks to the executor
-            futures = [executor.submit(compute_b_d, doc_id, doc_tfidf, d_star, threshold)
-					for doc_id, doc_tfidf in list_pre_rrd1]
 
-			# Process the results as they complete
-            for future in concurrent.futures.as_completed(futures):
-                doc_id, termid_minus_1 = future.result()
-                if termid_minus_1 is not None:
-                    b_d[doc_id] = termid_minus_1
+  
+        print('\nComputing b_d')
+        b_d = parallel_b_d(list_pre_rrd1, d_star)
         print(' DONE')
+        
         
         print('\nRDD creation...')
         rdd = sc.parallelize(list_pre_rrd1, numSlices=100)
-        #rdd = sc.parallelize(dict_pre_rrd2)#, numSlices=100)
         print(' DONE')
 
-        #print('\nDebug Print of the first rdd value')
-        #print(rdd.first()) 
         
-        print('\nflatMap (map_fun) transformation...')
+        print('\nAdding flatMap (map_fun) transformation...')
         mapped = rdd.flatMap(map_fun)
         print(' DONE')
         #print('\nDebug Print of the first mapped value')
         #print(mapped.first())
         
-        #mapped = list(map(map_fun, dict_pre_rrd2))
+        #mapped = list(map(map_fun, list_pre_rrd1))
         #print(mapped)
-        #mapped = list(map(flatten_list, mapped))
-        #print(mapped)
-        
-        print('\ngroupByKey transformation...')
+
+
+        print('\nAdding groupByKey transformation...')
         grouppedby = mapped.groupByKey().mapValues(list)
         print(' DONE')
         #print('\nDebug Print of the first grouppedby value')
         #print(grouppedby.first())
         
         #reduced = mapped.reduceByKey(lambda key, val: reduce_fun(key, val))
-        print('\nflatMap (reduce_fun) transformation...')
+        print('\nAdding flatMap (reduce_fun) transformation...')
         reduced = grouppedby.flatMap(reduce_fun)
         print(' DONE')
         
         
         reduced.cache()
         
-        print('\nRunning .collect() action')
+        print('\nRunning .collect() action with all transformations')
+        start = time.time()
         reduced_results = reduced.collect()
-        print(reduced_results)
+        end = time.time()
+        print(' DONE')
+        
+        print('\nSimilar Documents: ')
+        for tuple in reduced_results: print(tuple)
 
-        results[datasets_name] = reduced_results
+        results[datasets_name] = {'threshold': threshold, 'uniqie_pairs_sim_docs': len(reduced_results) // 2, 'elapsed': end-start}
 
     sc.stop()
 
