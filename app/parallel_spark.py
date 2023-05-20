@@ -3,6 +3,18 @@ from utils import threshold
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import multiprocessing as mp
+import concurrent.futures
+
+
+def compute_b_d(doc_id, doc_tfidf, d_star, threshold):
+    temp_product_sum = 0
+    sorted_indices = np.argsort(doc_tfidf)
+    for termid in sorted_indices:
+        temp_product_sum += doc_tfidf[termid] * d_star[termid]
+        if temp_product_sum >= threshold:
+            return doc_id, termid - 1
+    return doc_id, None
 
 
 def pyspark_APDS(pre_processed_data):
@@ -54,7 +66,7 @@ def pyspark_APDS(pre_processed_data):
         vectorizer = TfidfVectorizer()
         tfidf_features = vectorizer.fit_transform(list(docs_list.values())) #[:considered_docs]
         
-        dict_pre_rrd1 = list(
+        list_pre_rrd1 = list(
         	zip(list(docs_list.keys()), tfidf_features.toarray()) #[:considered_docs]
         )
         
@@ -69,20 +81,22 @@ def pyspark_APDS(pre_processed_data):
         #print('d_star', d_star)
         
         b_d = {}
-        print('\nComputing b_d')
-        for doc_id, doc_tfidf in dict_pre_rrd1:
-            temp_product_sum = 0  
-            sorted_indices = np.argsort(doc_tfidf)
-            for termid in sorted_indices:
-                temp_product_sum += doc_tfidf[termid] * d_star[termid]
-                if temp_product_sum >= threshold:
-                    b_d[doc_id] = termid - 1
-                    break
+        print('\nComputing b_d')                    
+        num_processes = mp.cpu_count()  # Get the number of CPU cores
+        with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+			# Submit the tasks to the executor
+            futures = [executor.submit(compute_b_d, doc_id, doc_tfidf, d_star, threshold)
+					for doc_id, doc_tfidf in list_pre_rrd1]
+
+			# Process the results as they complete
+            for future in concurrent.futures.as_completed(futures):
+                doc_id, termid_minus_1 = future.result()
+                if termid_minus_1 is not None:
+                    b_d[doc_id] = termid_minus_1
         print(' DONE')
-        #print('b_d', b_d)
         
         print('\nRDD creation...')
-        rdd = sc.parallelize(dict_pre_rrd1, numSlices=100)
+        rdd = sc.parallelize(list_pre_rrd1, numSlices=100)
         #rdd = sc.parallelize(dict_pre_rrd2)#, numSlices=100)
         print(' DONE')
 
