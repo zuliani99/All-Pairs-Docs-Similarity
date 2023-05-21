@@ -13,7 +13,7 @@ import pandas as pd
 import spacy
 
 
-considered_docs = 50
+considered_docs = None
 #threshold = 0.1 # Choosen threshold
 threshold = 0.8 # Choosen threshold
 

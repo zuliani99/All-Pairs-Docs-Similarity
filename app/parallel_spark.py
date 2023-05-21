@@ -1,3 +1,10 @@
+#https://phoenixnap.com/kb/install-spark-on-ubuntu
+
+import findspark
+findspark.init()
+
+import pyspark
+
 from pyspark.sql import SparkSession
 from utils import threshold, considered_docs
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -10,7 +17,7 @@ import time
 
 def single_b_d(doc_id, doc_tfidf, d_star, threshold):
     temp_product_sum = 0
-    sorted_indices = np.argsort(doc_tfidf)
+    sorted_indices = np.argsort(-1*doc_tfidf)
     for termid in sorted_indices:
         temp_product_sum += doc_tfidf[termid] * d_star[termid]
         if temp_product_sum >= threshold:
@@ -20,7 +27,6 @@ def single_b_d(doc_id, doc_tfidf, d_star, threshold):
 
 def parallel_b_d(list_pre_rrd1, d_star):
     b_d = {}
-    print('\nComputing b_d')                    
     num_processes = mp.cpu_count()  # Get the number of CPU cores
     with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
 		# Submit the tasks to the executor
@@ -44,7 +50,7 @@ def pyspark_APDS(pre_processed_data):
     def map_fun(pair):
         docid, tf_idf_list = pair
         res = []
-        sorted_indices = np.argsort(tf_idf_list)
+        sorted_indices = np.argsort(-1*tf_idf_list)
         for id_term in sorted_indices:
             if id_term > b_d[docid]:
                 res.append((id_term, (docid, tf_idf_list)))

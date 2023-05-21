@@ -21,9 +21,10 @@ pip install ipywidgets
 wget https://dlcdn.apache.org/spark/spark-3.4.0/spark-3.4.0-bin-hadoop3.tgz
 sha512sum spark-3.4.0-bin-hadoop3.tgz
 tar -xzf spark-3.4.0-bin-hadoop3.tgz
-
-pip install pyspark
 ```
+
+## Configure Spark Environment
+Follow this [tutorial](https://phoenixnap.com/kb/install-spark-on-ubuntu) 
 
 ## Used Daataset
 [nfcorpus](https://www.cl.uni-heidelberg.de/statnlpgroup/nfcorpus/)
