@@ -25,13 +25,13 @@ def single_b_d(doc_id, doc_tfidf, d_star, threshold):
     return doc_id, None
 
 
-def parallel_b_d(list_pre_rrd1, d_star):
+def parallel_b_d(list_pre_rrd, d_star):
     b_d = {}
     num_processes = mp.cpu_count()  # Get the number of CPU cores
     with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
 		# Submit the tasks to the executor
         futures = [executor.submit(single_b_d, doc_id, doc_tfidf, d_star, threshold)
-				for doc_id, doc_tfidf in list_pre_rrd1]
+				for doc_id, doc_tfidf in list_pre_rrd]
 
 		# Process the results as they complete
         for future in concurrent.futures.as_completed(futures):
@@ -90,31 +90,31 @@ def pyspark_APDS(pre_processed_data):
         print(f'\nPyspark All Documents Pairs Similarities - {datasets_name}')
         
         tfidf_features = 0
-        list_pre_rrd1 = []
+        list_pre_rrd = []
 
         # Create the features and columns vectors and list of key value pairs
         vectorizer = TfidfVectorizer()
         
         if considered_docs is not None:
             tfidf_features = vectorizer.fit_transform(list(docs_list.values())[:considered_docs])
-            list_pre_rrd1 = list(
+            list_pre_rrd = list(
          		zip(list(docs_list.keys())[:considered_docs], tfidf_features.toarray())
         	)
         else:
             tfidf_features = vectorizer.fit_transform(list(docs_list.values()))
-            list_pre_rrd1 = list(zip(list(docs_list.keys()), tfidf_features.toarray()))
+            list_pre_rrd = list(zip(list(docs_list.keys()), tfidf_features.toarray()))
         
         d_star = np.max(tfidf_features.toarray().T, axis=1)
         
 
   
         print('\nComputing b_d')
-        b_d = parallel_b_d(list_pre_rrd1, d_star)
+        b_d = parallel_b_d(list_pre_rrd, d_star)
         print(' DONE')
         
         
         print('\nRDD creation...')
-        rdd = sc.parallelize(list_pre_rrd1, numSlices=100)
+        rdd = sc.parallelize(list_pre_rrd, numSlices=1000)
         print(' DONE')
 
         
