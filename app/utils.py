@@ -15,9 +15,8 @@ import spacy
 import random
 
 
-considered_docs = 300
-threshold = 0.5 # Choosen threshold
-#threshold = 0.8 # Choosen threshold
+considered_docs = 1000
+threshold = 0.8 # Choosen threshold
 
 
 nlp = spacy.load('en_core_web_sm')
