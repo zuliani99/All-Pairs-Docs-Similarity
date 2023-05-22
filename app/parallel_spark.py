@@ -82,8 +82,10 @@ def pyspark_APDS(pre_processed_data, workers='*'):
     	.getOrCreate()
     sc = spark.sparkContext'''
 
-    conf = SparkConf()
-    conf.setMaster(f"local[{workers}]").setAppName("all_pairs_docs_similarity.com")
+    conf = SparkConf().setMaster(f"local[{workers}]") \
+        .setAppName("all_pairs_docs_similarity.com") \
+        .set("spark.executor.memory", "5g") \
+        .set("spark.driver.memory", "5g")
     sc = SparkContext(conf=conf)
     
     

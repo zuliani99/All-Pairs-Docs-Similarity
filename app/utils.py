@@ -97,5 +97,4 @@ def documents_preprocessing(dataset_name, documents):
 def sample_dict(dictionary):
     keys = list(dictionary.keys())  # Get a list of keys from the dictionary
     sampled_keys = random.sample(keys, considered_docs)  # Sample from the list of keys
-    sampled_dict = {key: dictionary[key] for key in sampled_keys}  # Create a new dictionary using the sampled keys
-    return sampled_dict
+    return {key: dictionary[key] for key in sampled_keys}
