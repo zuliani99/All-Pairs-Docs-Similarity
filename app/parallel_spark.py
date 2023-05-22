@@ -13,6 +13,7 @@ import numpy as np
 import multiprocessing as mp
 import concurrent.futures
 import time
+import random
 
 
 def single_b_d(doc_id, doc_tfidf, d_star, threshold):
@@ -44,7 +45,7 @@ def parallel_b_d(list_pre_rrd, d_star):
 
 
 
-def pyspark_APDS(pre_processed_data):
+def pyspark_APDS(pre_processed_data, workers='*'):
     
     # Map functuion
     def map_fun(pair):
@@ -73,7 +74,7 @@ def pyspark_APDS(pre_processed_data):
     
     # Create SparkSession 
     spark = SparkSession.builder \
-        .master("local[*]") \
+        .setMaster(f"local[{workers}]") \
     	.config("spark.driver.memory", "6g") \
         .config("spark.executor.memory", "6g") \
     	.appName("all_pairs_docs_similarity.com") \
@@ -91,19 +92,14 @@ def pyspark_APDS(pre_processed_data):
         
         tfidf_features = 0
         list_pre_rrd = []
+        docs_list = dict(random.sample(list(docs_list), considered_docs))
 
         # Create the features and columns vectors and list of key value pairs
         vectorizer = TfidfVectorizer()
         
-        if considered_docs is not None:
-            tfidf_features = vectorizer.fit_transform(list(docs_list.values())[:considered_docs])
-            list_pre_rrd = list(
-         		zip(list(docs_list.keys())[:considered_docs], tfidf_features.toarray())
-        	)
-        else:
-            tfidf_features = vectorizer.fit_transform(list(docs_list.values()))
-            list_pre_rrd = list(zip(list(docs_list.keys()), tfidf_features.toarray()))
         
+        tfidf_features = vectorizer.fit_transform(list(docs_list.values()))
+        list_pre_rrd = list(zip(list(docs_list.keys()), tfidf_features.toarray()))
         d_star = np.max(tfidf_features.toarray().T, axis=1)
         
 
@@ -121,8 +117,8 @@ def pyspark_APDS(pre_processed_data):
         print('\nAdding flatMap (map_fun) transformation...')
         mapped = rdd.flatMap(map_fun)
         print(' DONE')
-        #print('\nDebug Print of the first mapped value')
-        #print(mapped.first())
+        print('\nDebug Print of the first mapped value')
+        print(mapped.first())
         
         #mapped = list(map(map_fun, list_pre_rrd1))
         #print(mapped)
@@ -131,8 +127,8 @@ def pyspark_APDS(pre_processed_data):
         print('\nAdding groupByKey transformation...')
         grouppedby = mapped.groupByKey().mapValues(list)
         print(' DONE')
-        #print('\nDebug Print of the first grouppedby value')
-        #print(grouppedby.first())
+        print('\nDebug Print of the first grouppedby value')
+        print(grouppedby.first())
         
         #reduced = mapped.reduceByKey(lambda key, val: reduce_fun(key, val))
         print('\nAdding flatMap (reduce_fun) transformation...')

@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
 	print('\n\n')
 	print('-------------------- PySpark --------------------')
-	pyspark_results = pyspark_APDS(pre_processed_data)
+	pyspark_results = pyspark_APDS(pre_processed_data, workers=8)
 	print('\nPySpark Parallel Version Results: ', pyspark_results) 
  
 	#os.system('../../spark-3.4.0-bin-hadoop3/sbin/stop-worker.sh')

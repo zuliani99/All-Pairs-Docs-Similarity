@@ -3,6 +3,7 @@ from utils import threshold, considered_docs
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import random
 
 #def classic_all_pairs_docs_sim(docs_list: List[str], threshold: float):
 def classic_all_pairs_docs_sim(docs_list):
@@ -13,9 +14,9 @@ def classic_all_pairs_docs_sim(docs_list):
     doc_similaritis = []
     vectorizer = TfidfVectorizer()
     
-    considered_keys = list(docs_list.keys())[:consider]
+    considered_keys = list(docs_list.keys())
     
-    features = vectorizer.fit_transform(list(docs_list.values())[:consider])
+    features = vectorizer.fit_transform(list(docs_list.values()))
     
     start = time.time()
     similarities = cosine_similarity(features)
@@ -38,9 +39,9 @@ def npargwhere_all_pairs_docs_sim(docs_list):
     
     vectorizer = TfidfVectorizer()
     
-    considered_keys = list(docs_list.keys())[:consider]
+    considered_keys = list(docs_list.keys())
     
-    features = vectorizer.fit_transform(list(docs_list.values())[:consider])
+    features = vectorizer.fit_transform(list(docs_list.values()))
 
     start = time.time()
     similarities = cosine_similarity(features)
@@ -65,6 +66,9 @@ def squential_APDS(pre_processed_data):
     result_classic = {}
     result_np = {}
     for datasets_name, docs_list in pre_processed_data.items():
+        
+        docs_list = dict(random.sample(list(docs_list), considered_docs))
+        
         print(f'Sequential All Documents Pairs Similarities - {datasets_name} - Classic Version')
         similar_list, stat = classic_all_pairs_docs_sim(docs_list)
         print('Similar documents: ')
