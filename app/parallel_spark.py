@@ -18,10 +18,10 @@ import time
 def single_b_d(doc_id, doc_tfidf, d_star, threshold):
     temp_product_sum = 0
     sorted_indices = np.argsort(-1*doc_tfidf)
-    for termid in sorted_indices:
+    for pos, termid in enumerate(sorted_indices):
         temp_product_sum += doc_tfidf[termid] * d_star[termid]
         if temp_product_sum >= threshold:
-            return doc_id, termid - 1
+            return doc_id, sorted_indices[pos - 1]
     return doc_id, None
 
 
