@@ -12,10 +12,12 @@ except ModuleNotFoundError:
 import pandas as pd
 import spacy
 
+import random
 
-considered_docs = 200
-#threshold = 0.1 # Choosen threshold
-threshold = 0.8 # Choosen threshold
+
+considered_docs = 300
+threshold = 0.5 # Choosen threshold
+#threshold = 0.8 # Choosen threshold
 
 
 nlp = spacy.load('en_core_web_sm')
@@ -90,3 +92,10 @@ def documents_preprocessing(dataset_name, documents):
 	write_pd.to_parquet(os.path.join(path_datasets, dataset_name, 'pre_processed_corpus.parquet'))
 
 	return new_documents
+
+
+def sample_dict(dictionary):
+    keys = list(dictionary.keys())  # Get a list of keys from the dictionary
+    sampled_keys = random.sample(keys, considered_docs)  # Sample from the list of keys
+    sampled_dict = {key: dictionary[key] for key in sampled_keys}  # Create a new dictionary using the sampled keys
+    return sampled_dict
