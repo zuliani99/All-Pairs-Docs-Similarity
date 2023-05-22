@@ -26,7 +26,7 @@ tar -xzf spark-3.4.0-bin-hadoop3.tgz
 ## Configure Spark Environment
 Follow this [tutorial](https://phoenixnap.com/kb/install-spark-on-ubuntu) 
 
-## Used Daataset
+## Used Dataset
 [nfcorpus](https://www.cl.uni-heidelberg.de/statnlpgroup/nfcorpus/)
 
 
