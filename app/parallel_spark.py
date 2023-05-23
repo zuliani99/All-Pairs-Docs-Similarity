@@ -113,7 +113,7 @@ def pyspark_APDS(pre_processed_data, workers=mp.cpu_count()):
         
         
         
-        list_pre_rrd = list(zip(range(len(tfidf_features)), matrix)) # INSERIRE DICT_KEYS e matrix
+        list_pre_rrd = list(zip(range(len(tfidf_features)), matrix)) # non ho nemmeno messo la crs_matrix
         
         
         
@@ -136,7 +136,7 @@ def pyspark_APDS(pre_processed_data, workers=mp.cpu_count()):
 
 
         print('\nRDD creation...')
-        rdd = sc.parallelize(list_pre_rrd, numSlices=10*workers) # Creare the RDD
+        rdd = sc.parallelize(list_pre_rrd, numSlices=50*workers) # Creare the RDD
         print(' DONE')
 
 

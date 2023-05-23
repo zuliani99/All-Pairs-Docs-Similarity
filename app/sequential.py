@@ -1,9 +1,9 @@
 import time
-from utils import threshold, sample_dict
+from utils import threshold
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import random
+
 
 #def classic_all_pairs_docs_sim(docs_list: List[str], threshold: float):
 def classic_all_pairs_docs_sim(docs_list):
@@ -61,7 +61,6 @@ def squential_APDS(pre_processed_data):
     result_np = {}
     for datasets_name, docs_list in pre_processed_data.items():
         
-        #docs_list = sample_dict(docs_list)
         
         print(f'Sequential All Documents Pairs Similarities - {datasets_name} - Classic Version')
         similar_list, stat = classic_all_pairs_docs_sim(docs_list)
