@@ -3,6 +3,8 @@ from beir import util
 from beir.datasets.data_loader import GenericDataLoader
 from concurrent.futures import ProcessPoolExecutor
 import multiprocessing as mp
+import csv
+
 try:
     import ipywidgets
     from tqdm.auto import tqdm
@@ -11,12 +13,8 @@ except ModuleNotFoundError:
     
 import pandas as pd
 import spacy
-
 import random
 
-
-considered_docs = None
-threshold = 0.8 # Choosen threshold
 
 
 nlp = spacy.load('en_core_web_sm')
@@ -93,9 +91,22 @@ def documents_preprocessing(dataset_name, documents):
 	return new_documents
 
 
-def sample_dict(dictionary):
-    if considered_docs is not None:
-        keys = list(dictionary.keys())  # Get a list of keys from the dictionary
-        sampled_keys = random.sample(keys, considered_docs)  # Sample from the list of keys
-        return {key: dictionary[key] for key in sampled_keys}
-    else: return dictionary
+def sample_dict(dictionary, considered_docs):
+    if considered_docs is None:
+        return dictionary
+    keys = list(dictionary.keys())  # Get a list of keys from the dictionary
+    sampled_keys = random.sample(keys, considered_docs)  # Sample from the list of keys
+    return {key: dictionary[key] for key in sampled_keys}
+    
+
+def create_doc_sim_csv(pairs_list, ds_name,  threshold, type, workers=None):
+    path = ''
+    if type is not None:
+        if not os.path.exists(f'./results/{ds_name}/{threshold}'): os.makedirs(f'./results/{ds_name}/{threshold}')
+        path = f'./results/{ds_name}/{threshold}/{type}_sequential.csv'
+    else:
+        if not os.path.exists(f'./results/{ds_name}/{threshold}/pyspark/'): os.makedirs(f'./results/{ds_name}/{threshold}/pyspark/')
+        path = f'./results/{ds_name}/{threshold}/pyspark/{workers}_workers.csv'
+    with open(path, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(pairs_list)
