@@ -15,8 +15,8 @@ import spacy
 import random
 
 
-considered_docs = 1000
-threshold = 0.8 # Choosen threshold
+considered_docs = 50
+threshold = 0.2 # Choosen threshold
 
 
 nlp = spacy.load('en_core_web_sm')
@@ -61,7 +61,7 @@ def pre_process(dictionary):
 def documents_preprocessing(dataset_name, documents):
 	'''
 	PURPOSE: preprocess all the documents and query for the relative dataset
-	ARGUMENTS:
+	ARGUMENTS:tfidf_features
 		- dataset_name (str): string describing the dataset name
 		- documents (Dict[str, List[str]]): doc_id, document_text dictionary
 	RETURN: 
