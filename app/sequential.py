@@ -61,7 +61,7 @@ def squential_APDS(pre_processed_data):
     result_np = {}
     for datasets_name, docs_list in pre_processed_data.items():
         
-        docs_list = sample_dict(docs_list)
+        #docs_list = sample_dict(docs_list)
         
         print(f'Sequential All Documents Pairs Similarities - {datasets_name} - Classic Version')
         similar_list, stat = classic_all_pairs_docs_sim(docs_list)

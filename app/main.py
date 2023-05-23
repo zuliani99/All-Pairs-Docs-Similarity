@@ -1,6 +1,7 @@
 from utils import download_dataset, documents_preprocessing
 from sequential import squential_APDS
 from parallel_spark import pyspark_APDS
+from utils import sample_dict
 import os
 
 if __name__ == "__main__":
@@ -8,7 +9,7 @@ if __name__ == "__main__":
 	
 	datasets_data = {dataset: download_dataset(dataset) for dataset in datasets}
     
-	pre_processed_data = {dataset: documents_preprocessing(dataset, docs_dict) for dataset, docs_dict in datasets_data.items()}
+	pre_processed_data = {dataset: sample_dict(documents_preprocessing(dataset, docs_dict)) for dataset, docs_dict in datasets_data.items()}
 
 	result_classic, result_np = squential_APDS(pre_processed_data) 
 	print('\nClassic Sequential Version Results: ', result_classic)
@@ -16,7 +17,7 @@ if __name__ == "__main__":
 
 	print('\n\n')
 	print('-------------------- PySpark --------------------')
-	pyspark_results = pyspark_APDS(pre_processed_data, workers=8)
+	pyspark_results = pyspark_APDS(pre_processed_data, workers=4)
 	print('\nPySpark Parallel Version Results: ', pyspark_results) 
  
 	#os.system('../../spark-3.4.0-bin-hadoop3/sbin/stop-worker.sh')

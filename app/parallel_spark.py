@@ -11,9 +11,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import time
 import itertools
+import multiprocessing as mp
+from scipy.sparse import rand, csr_matrix
 
-'''def cosine_similarity(A, B):
-    return np.dot(A,B)/(np.linalg.norm(A)*np.linalg.norm(B))'''
 
 
 def compute_b_d(matrix, d_star):
@@ -29,16 +29,16 @@ def compute_b_d(matrix, d_star):
 
 
 
-def pyspark_APDS(pre_processed_data, workers='*'):
+def pyspark_APDS(pre_processed_data, workers=mp.cpu_count()):
 
 
     # Map functuion
     def map_fun(pair):
         docid, tf_idf_list = pair
         res = []
-        for id_term in range(0, len(tf_idf_list)):
+        for id_term in np.nonzero(tf_idf_list)[0]:
             if id_term > sc_b_d.value[docid]:
-                res.append((id_term, (docid, np.nonzero(tf_idf_list))))
+                res.append((id_term, (docid, tf_idf_list)))
         return res
 
 
@@ -48,10 +48,10 @@ def pyspark_APDS(pre_processed_data, workers='*'):
         term, tf_idf_list = pair
         res = []
         for (id1, d1), (id2, d2) in itertools.combinations(tf_idf_list, 2):
-            if term == np.max(np.intersect1d(d1, d2)):#max(list(set(d1) & set(d2))):#np.max(np.intersect1d(d1, d2)):
-                sim = cosine_similarity([sc_mat.value[id1]], [sc_mat.value[id2]])[0][0]
+            if term == np.max(np.intersect1d(np.nonzero(d1), np.nonzero(d2))):
+                sim = np.dot(d1,d2)
                 if sim >= sc_treshold.value:
-                        res.append((id1, id2, sim))
+                    res.append((id1, id2, sim))
         return res
     
     '''
@@ -86,38 +86,52 @@ def pyspark_APDS(pre_processed_data, workers='*'):
         
         print(f'\nPyspark All Documents Pairs Similarities - {datasets_name}')
         
-        docs_list = sample_dict(docs_list) # Sample a set of documents
+        #docs_list = sample_dict(docs_list) # Sample a set of documents
         doc_keys = list(docs_list.keys())
+        #print(doc_keys)
 
 
         vectorizer = TfidfVectorizer()
         tfidf_features = vectorizer.fit_transform(list(docs_list.values())).toarray() # Get the TF-IDF matrix
 
+        #tfidf_features = rand(4, 6, density=0.35, format="csr", random_state=42).toarray()        
+        
+        #print('tfidf_features', tfidf_features)
+
 
         doc_freq = np.sum(tfidf_features > 0, axis=0) # Compute document frequency
-        print('doc_freq', doc_freq)
+        #print('doc_freq', doc_freq)
 
         dec_doc_freq = np.argsort(doc_freq)[::-1] #  Decreasing order of dcoument frequency
-        print('dec_doc_freq', dec_doc_freq)
+        #print('dec_doc_freq', dec_doc_freq)
 
         # Ordered matrix 
         matrix = np.array([row[dec_doc_freq] for row in tfidf_features])
-        print('matrix', matrix)
+        #print('matrix', matrix)
 
         # Computing the list that will feed into the rdd, list of pairs of (docid, tfidf_list)
-        list_pre_rrd = list(zip(range(0, len(tfidf_features)), matrix))
-        print('list_pre_rrd', list_pre_rrd)
+        
+        
+        
+        list_pre_rrd = list(zip(range(len(tfidf_features)), matrix)) # INSERIRE DICT_KEYS e matrix
+        
+        
+        
+        
+        
+        #print('list_pre_rrd', list_pre_rrd)
 
         d_star = np.max(matrix.T, axis=1) # Computing d*
-        print('d_star', d_star)
+        #print('d_star', d_star)
 
 
-        sc_mat = sc.broadcast(matrix)
+        #sc_mat = sc.broadcast(matrix)
 
 
         print('\nComputing b_d')
         sc_b_d = sc.broadcast(compute_b_d(list_pre_rrd, d_star)) # Compute and propagate the b_d
         print(' DONE')
+        #print(sc_b_d.value)
 
 
 
@@ -131,14 +145,21 @@ def pyspark_APDS(pre_processed_data, workers='*'):
         mapped = rdd.flatMap(map_fun)
         print(' DONE')
         #print('\nDebug Print of the first mapped value')
-        #for tuple in mapped.collect(): print(tuple)
+        #print(mapped.first())
+        #for idterm, pair in mapped.collect():
+            #print(idterm, pair)
+            #print(idterm, pair[0], len(pair[1]))
 
 
         print('\nAdding groupByKey transformation...')
-        grouppedby = mapped.groupByKey().mapValues(list)
+        grouppedby = mapped.groupByKey()#.mapValues(list)
         print(' DONE')
         #print('\nDebug Print of the first grouppedby value')
-        #for tuple in grouppedby.collect(): print(tuple)
+        #print(grouppedby.first())
+        #print(grouppedby.collect())
+        '''for idterm, lis in grouppedby.collect():
+            print(idterm)
+            for l in lis: print(l[0], len(l[1]))'''
 
 
         print('\nAdding flatMap (reduce_fun) transformation...')
@@ -146,8 +167,11 @@ def pyspark_APDS(pre_processed_data, workers='*'):
         print(' DONE')
         #print('\nDebug Print of the first reduced value')
         #print(reduced.first())
-
-
+        
+        '''collect = grouppedby.mapValues(list).collect()
+		
+        res = list(map(reduce_fun, collect))
+        print(res)'''
         print('\nRunning .collect() action with all transformations')
         start = time.time()
         reduced_results = reduced.collect()
