@@ -31,28 +31,9 @@ Follow this [tutorial](https://phoenixnap.com/kb/install-spark-on-ubuntu)
 
 
 ## Start Application
-Start *PySpark* typing:
+Enter in the *app* folder and run
 ```console
-./spark-3.4.0-bin-hadoop3/bin/pyspark
-```
-
-And memorize the location of HOST:PORT of the local server
-
-Simulate a cluster on a single machine:
-
-```console
-./spark-3.4.0-bin-hadoop3/sbin/start-master.sh
-```
-
-After launching the master node as above, its web user interface is available at *http://localhost:8080/* Then you can launch as many workers using as the spark://HOST:PORT the main url reported on the web UI ( above the Alive Workers entry)
-
-```console
-export SPARK_WORKER_INSTANCES=4; ./spark-3.4.0-bin-hadoop3/sbin/start-worker.sh spark://riccardo-HP-EliteBook-840-G2:7077
-```
-
-Now you can launch a script on the cluster you just created, and monitor its advance on the master web UI:
-```console
-./spark-3.4.0-bin-hadoop3/bin/spark-submit --master spark://riccardo-HP-EliteBook-840-G2:7077 ./All-Pairs-Docs-Similarity/app/main.py
+python main.py
 ```
 
 ## Results
