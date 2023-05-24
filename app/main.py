@@ -7,11 +7,13 @@ import pandas as pd
 if __name__ == "__main__":
 	datasets = ['nfcorpus'] # Choosen datasets
 	thresholds = [0.5, 0.7, 0.8, 0.9] # Choosen thresholds
-	max_workers = 10
-	considered_docs = 500
+	max_workers = 10 # Maximum amount of workers
+	considered_docs = 1000 # Number of considere documents
 
+	# Download datasets
 	datasets_data = {dataset: download_dataset(dataset) for dataset in datasets}
 
+	# Pre-process and sample with the original datasets
 	pre_processed_data = {dataset: sample_dict(documents_preprocessing(dataset, docs_dict), considered_docs) 
 	for dataset, docs_dict in datasets_data.items()}
 
