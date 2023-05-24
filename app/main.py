@@ -6,9 +6,9 @@ import pandas as pd
 
 if __name__ == "__main__":
 	datasets = ['nfcorpus'] # Choosen datasets
-	thresholds = [0.5, 0.7, 0.8, 0.9] # Choosen thresholds
-	max_workers = 10 # Maximum amount of workers
-	considered_docs = 1000 # Number of considere documents
+	thresholds = [0.5, 0.6, 0.7, 0.8, 0.9] # Choosen thresholds
+	max_workers = 10
+	considered_docs = 1000
 
 	# Download datasets
 	datasets_data = {dataset: download_dataset(dataset) for dataset in datasets}

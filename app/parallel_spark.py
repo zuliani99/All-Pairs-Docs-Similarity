@@ -122,6 +122,7 @@ def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
 	sc_b_d = sc.broadcast(compute_b_d(list_pre_rrd, d_star, threshold)) # Compute and propagate the b_d
 
 	rdd = sc.parallelize(list_pre_rrd, numSlices=workers) # Creare the RDD
+	rdd = sc.parallelize(list_pre_rrd, numSlices=workers*4) # Creare the RDD
 	
 	# Adding all transformations
 	reduced = rdd.flatMap(map_fun).groupByKey().flatMap(reduce_fun).persist()
