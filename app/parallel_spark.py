@@ -4,7 +4,7 @@ import findspark
 findspark.init()
 
 from pyspark.conf import SparkConf
-from pyspark.context import SparkContext
+from pyspark.sql import SparkSession
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import time
@@ -68,12 +68,25 @@ def pyspark_APDS(ds_name, sampled_dict, threshold, workers):
 			
    
 	# Create SparkSession 
-	conf = SparkConf().setMaster(f"local[{workers}]") \
+	'''conf = SparkConf().setMaster(f"local[{workers}]") \
 		.setAppName("all_pairs_docs_similarity.com") \
 		.set("spark.executor.memory", "10g") \
-		.set("spark.dgrouppedbyriver.memory", "10g")
-	sc = SparkContext(conf=conf)
-			
+		.set("spark.driver.memory", "10g")
+	sc = SparkContext(conf=conf)'''
+ 
+	
+
+	spark = SparkSession\
+	.builder\
+    .config(conf = SparkConf().setMaster(f"local[{workers}]") \
+		.setAppName("all_pairs_docs_similarity.com") \
+		.set("spark.executor.memory", "10g") \
+		.set("spark.driver.memory", "10g"))\
+	.getOrCreate()
+ 
+ 
+	sc = spark.sparkContext
+ 
 	
 	sc_treshold = sc.broadcast(threshold)
 				
@@ -106,7 +119,7 @@ def pyspark_APDS(ds_name, sampled_dict, threshold, workers):
 
 
 	#print('\nRDD creation...')
-	rdd = sc.parallelize(list_pre_rrd, numSlices=50*workers) # Creare the RDD
+	rdd = sc.parallelize(list_pre_rrd, numSlices=workers) # Creare the RDD
 	#print(' DONE')
 	
 
@@ -137,7 +150,7 @@ def pyspark_APDS(ds_name, sampled_dict, threshold, workers):
 		for (id1, id2, sim) in reduced_results:
 			print(doc_keys[id1], doc_keys[id2], sim)'''
 			
-	sc.stop()
+	spark.stop()
 
 	return [(doc_keys[id1], doc_keys[id2], sim) for (id1, id2, sim) in reduced_results], \
      		[ds_name, end-start, threshold, len(reduced_results), workers]
