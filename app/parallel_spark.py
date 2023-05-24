@@ -119,7 +119,7 @@ def pyspark_APDS(ds_name, sampled_dict, threshold, workers):
 
 
 	#print('\nRDD creation...')
-	rdd = sc.parallelize(list_pre_rrd, numSlices=workers) # Creare the RDD
+	rdd = sc.parallelize(list_pre_rrd, numSlices=workers*4) # Creare the RDD
 	#print(' DONE')
 	
 
