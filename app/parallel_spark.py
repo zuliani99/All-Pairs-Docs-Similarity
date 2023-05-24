@@ -34,7 +34,7 @@ def compute_b_d(matrix: np.ndarray, d_star: np.ndarray, threshold: float) -> Dic
 
 
 def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
-	workers: int) -> Tuple[List[Tuple[str, str, float]], Tuple[str, float, float, int, int]]:
+	workers: int, s_factor: int) -> Tuple[List[Tuple[str, str, float]], Tuple[str, float, float, int, int]]:
 	'''
 	PURPOSE: perform PySpark versio of All Pairs Documents Similarity
 	ARGUMENTS:
@@ -42,6 +42,7 @@ def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
 		- sampled_dict (Dict[str, str]): sampled documents
 		- threshold (float): threshold to use
 		- workers (int): number of workers to use
+		- s_factor (int): numSlice factor
 	RETURN:
 		- (Tuple[List[Tuple[str, str, float]], Tuple[str, loat, float, int, int]])
 			- List of tuples of similar unique pair with the relative similarity
@@ -121,7 +122,7 @@ def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
 	d_star = np.max(matrix.T, axis=1) # Computing d*
 	sc_b_d = sc.broadcast(compute_b_d(list_pre_rrd, d_star, threshold)) # Compute and propagate the b_d
 
-	rdd = sc.parallelize(list_pre_rrd, numSlices=workers*4) # Creare the RDD
+	rdd = sc.parallelize(list_pre_rrd, numSlices=s_factor*workers) # Creare the RDD
 	
 	# Adding all transformations
 	reduced = rdd.flatMap(map_fun).groupByKey().flatMap(reduce_fun).persist()
@@ -133,4 +134,4 @@ def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
 	spark.stop() # Stop spark session
 
 	return [(doc_keys[id1], doc_keys[id2], sim) for (id1, id2, sim) in reduced_results], \
-	 		[ds_name, end-start, threshold, len(reduced_results), workers]
+	 		[ds_name, end-start, threshold, len(reduced_results), workers, s_factor]
