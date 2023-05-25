@@ -10,7 +10,7 @@ if __name__ == "__main__":
 	thresholds = [0.3, 0.5, 0.7, 0.8, 0.9] # Choosen thresholds
 	numslices_factor = [1, 3, 5, 7, 9] # Choosen numslices factor
 	max_workers = 15
-	considered_docs = 750
+	considered_docs = 500
 
 	# Download datasets
 	datasets_data = {dataset: download_dataset(dataset) for dataset in datasets}
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 			for s_factor, workers in itertools.product(numslices_factor, range(1, max_workers + 1)):
 				# PySpark Execution
 
-				print(f'\nPySpark Parallel Execution withc {workers} workers and slice factor of {s_factor}')
+				print(f'\nPySpark Parallel Execution with {workers} workers and slice factor of {s_factor}')
 				sim_doc_ps, ps_res = pyspark_APDS(ds_name=ds_name, sampled_dict=sampled_dict, threshold=threshold, workers=workers, s_factor=s_factor)
 				pyspark_results.append(ps_res)
 				create_doc_sim_csv(sim_doc_ps, ds_name, threshold, None, workers)
