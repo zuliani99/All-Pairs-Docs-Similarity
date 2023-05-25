@@ -29,6 +29,8 @@ def compute_b_d(matrix: np.ndarray, d_star: np.ndarray, threshold: float) -> Dic
 			if temp_product_sum >= threshold:
 				b_d[docid] = pos - 1
 				break
+		if(docid not in list(b_d.keys())):
+			b_d[docid] = len(tfidf_row)-1
 	return b_d
 
 
@@ -36,7 +38,7 @@ def compute_b_d(matrix: np.ndarray, d_star: np.ndarray, threshold: float) -> Dic
 def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
 	workers: int, s_factor: int) -> Tuple[List[Tuple[str, str, float]], Tuple[str, float, float, int, int]]:
 	'''
-	PURPOSE: perform PySpark versio of All Pairs Documents Similarity
+	PURPOSE: perform PySpark version of All Pairs Documents Similarity
 	ARGUMENTS:
 		- ds_name (str): Dataset name
 		- sampled_dict (Dict[str, str]): sampled documents
@@ -98,6 +100,7 @@ def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
 	.config(conf = SparkConf().setMaster(f"local[{workers}]") \
 		.setAppName("all_pairs_docs_similarity.com") \
 		.set("spark.executor.memory", "10g") \
+		.set("spark.executor.cores", "1") \
 		.set("spark.driver.memory", "10g"))\
 	.getOrCreate()
  
@@ -111,7 +114,7 @@ def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
 	tfidf_features = vectorizer.fit_transform(list(sampled_dict.values())).toarray() # Get the TF-IDF matrix
 
 	doc_freq = np.sum(tfidf_features > 0, axis=0) # Compute document frequency
-	dec_doc_freq = np.argsort(doc_freq)[::-1] #  Decreasing order of dcoument frequency
+	dec_doc_freq = np.argsort(doc_freq)[::-1] #  Decreasing order of document frequency
 
 	# Ordered matrix 
 	matrix = np.array([row[dec_doc_freq] for row in tfidf_features])
