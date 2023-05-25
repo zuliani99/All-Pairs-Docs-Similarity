@@ -130,6 +130,7 @@ def create_doc_sim_csv(pairs_list: List[Tuple[str, str, float]], ds_name: str,
 	else:
 		if not os.path.exists(f'./results/{ds_name}/{threshold}/pyspark/'): os.makedirs(f'./results/{ds_name}/{threshold}/pyspark/')
 		path = f'./results/{ds_name}/{threshold}/pyspark/{workers}_workers.csv'
-	with open(path, 'w', newline='') as csvfile:
-		writer = csv.writer(csvfile)
-		writer.writerows(pairs_list)
+	if not os.path.exists(path): # If there is already a file, return
+		with open(path, 'w', newline='') as csvfile:
+			writer = csv.writer(csvfile)
+			writer.writerows(pairs_list)

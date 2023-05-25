@@ -7,8 +7,8 @@ import pandas as pd
 
 if __name__ == "__main__":
 	datasets = ['nfcorpus'] # Choosen datasets
-	thresholds = [0.5, 0.6, 0.7, 0.8, 0.9] # Choosen thresholds
-	numslices_factor = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+	thresholds = [0.3, 0.5, 0.7, 0.8, 0.9] # Choosen thresholds
+	numslices_factor = [1, 2, 3, 4, 5] # Choosen numslices factor
 	max_workers = 15
 	considered_docs = 750
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 			print('\nNumpy Sequential Execution')
 			sim_doc_np, np_res = numpy_squential_APDS(ds_name=ds_name, sampled_dict=sampled_dict, threshold=threshold)
 			sequential_results.append(np_res)
-			#create_doc_sim_csv(sim_doc_np, ds_name, threshold, 'numpy')
+			create_doc_sim_csv(sim_doc_np, ds_name, threshold, 'numpy')
 			print(' Done')
 
 			for s_factor, workers in itertools.product(numslices_factor, range(1, max_workers + 1)):
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 				print(f'\nPySpark Parallel Execution withc {workers} workers and slice factor of {s_factor}')
 				sim_doc_ps, ps_res = pyspark_APDS(ds_name=ds_name, sampled_dict=sampled_dict, threshold=threshold, workers=workers, s_factor=s_factor)
 				pyspark_results.append(ps_res)
-				#create_doc_sim_csv(sim_doc_ps, ds_name, threshold, None, workers)
+				create_doc_sim_csv(sim_doc_ps, ds_name, threshold, None, workers)
 				print(' Done')
 
 			print('\n')
