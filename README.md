@@ -37,3 +37,4 @@ python main.py
 ```
 
 ## Results
+![Benchmark Results](./benchmark_graph.png)
