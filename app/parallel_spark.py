@@ -5,6 +5,7 @@ findspark.init()
 from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import time
 import itertools
@@ -88,7 +89,7 @@ def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
 		# Use itertools.combinations to perform smart nested for loop
 		for (id1, d1), (id2, d2) in itertools.combinations(tf_idf_list, 2):
 			if term == np.max(np.intersect1d(np.nonzero(d1), np.nonzero(d2))):
-				sim = np.dot(d1,d2)
+				sim = cosine_similarity([d1], [d2])[0][0]
 				if sim >= sc_treshold.value:
 					res.append((id1, id2, sim))
 		return res
