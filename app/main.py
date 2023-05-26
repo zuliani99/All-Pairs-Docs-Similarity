@@ -8,9 +8,9 @@ import pandas as pd
 if __name__ == "__main__":
 	datasets = ['nfcorpus'] # Choosen datasets
 	thresholds = [0.3, 0.5, 0.7, 0.8, 0.9] # Choosen thresholds
-	numslices_factor = [1, 3, 5, 7, 9] # Choosen numslices factor
+	numslices_factor = [1, 3, 5, 7, 9, 11] # Choosen numslices factor
 	max_workers = 15
-	considered_docs = 500
+	considered_docs = 1000
 
 	# Download datasets
 	datasets_data = {dataset: download_dataset(dataset) for dataset in datasets}

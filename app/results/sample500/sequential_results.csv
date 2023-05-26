@@ -1,0 +1,11 @@
+type,ds_name,elapsed,threshold,uniqie_pairs_sim_docs
+classic,nfcorpus,0.028694868087768555,0.3,240
+numpy,nfcorpus,0.016097545623779297,0.3,240
+classic,nfcorpus,0.026073694229125977,0.5,9
+numpy,nfcorpus,0.015635013580322266,0.5,9
+classic,nfcorpus,0.02718949317932129,0.7,0
+numpy,nfcorpus,0.016608238220214844,0.7,0
+classic,nfcorpus,0.028751611709594727,0.8,0
+numpy,nfcorpus,0.01653289794921875,0.8,0
+classic,nfcorpus,0.027975797653198242,0.9,0
+numpy,nfcorpus,0.015596628189086914,0.9,0

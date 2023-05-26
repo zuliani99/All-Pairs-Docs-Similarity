@@ -1,3 +1,0 @@
-type,ds_name,elapsed,threshold,uniqie_pairs_sim_docs
-classic,nfcorpus,0.05625152587890625,0.3,181
-numpy,nfcorpus,0.029863834381103516,0.3,181
