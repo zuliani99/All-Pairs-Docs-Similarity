@@ -55,9 +55,9 @@ def numpy_squential_APDS(ds_name: str, sampled_dict: Dict[str, str],
 	'''	
  
 	vectorizer = TfidfVectorizer()
-	
+
 	keys = list(sampled_dict.keys())
-	
+
 	features = vectorizer.fit_transform(list(sampled_dict.values()))
 
 	start = time.time()
@@ -65,8 +65,10 @@ def numpy_squential_APDS(ds_name: str, sampled_dict: Dict[str, str],
 	np.fill_diagonal(similarities, -1.0)
 	idx_doc_similaritis = np.argwhere(similarities >= threshold)
 	end = time.time()
-	
+
+	unique_pairs = {tuple(sorted(p)) for p in idx_doc_similaritis}
+
 	return [
-		(keys[similar.tolist()[0]], keys[similar.tolist()[1]], similarities[similar[0], similar[1]])
-		for similar in idx_doc_similaritis
+		(keys[id1], keys[id2], similarities[id1, id2])
+		for id1, id2 in unique_pairs
 	], ['numpy', ds_name, end-start, threshold, len(idx_doc_similaritis) // 2]
