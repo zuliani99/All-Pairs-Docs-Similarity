@@ -113,7 +113,7 @@ def sample_dict(dictionary: Dict[str, str], considered_docs: int | None) -> Dict
 def create_doc_sim_csv(pairs_list: List[Tuple[str, str, float]], ds_name: str,
 					   threshold: float, type: str | None, workers: None | int = None ) -> None: 
 	'''
-	PURPOSE: sample a set of element of the document dictionary
+	PURPOSE: create the .csv file sotring the list of similar documents pairs with the cosine similarity
 	ARGUMENTS:
 		- pairs_list (List[Tuple[str, str, float]]): list of unique similar pair with the similarity
 		- ds_name: (str): dataset name

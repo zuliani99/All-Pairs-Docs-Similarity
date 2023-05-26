@@ -8,7 +8,7 @@ import pandas as pd
 if __name__ == "__main__":
 	datasets = ['nfcorpus'] # Choosen datasets
 	thresholds = [0.3, 0.5, 0.7, 0.8, 0.9] # Choosen thresholds
-	numslices_factor = [1, 3, 5, 7, 9] # Choosen numslices factor
+	numslices_factor = [1, 3, 5, 7, 9] # Choosen numslices factors
 	max_workers = 15
 	considered_docs = 750
 

@@ -62,8 +62,8 @@ def numpy_squential_APDS(ds_name: str, sampled_dict: Dict[str, str],
 
 	start = time.time()
 	similarities = cosine_similarity(features)
-	np.fill_diagonal(similarities, 0.0)
-	idx_doc_similaritis = np.argwhere(similarities > threshold)
+	np.fill_diagonal(similarities, -1.0)
+	idx_doc_similaritis = np.argwhere(similarities >= threshold)
 	end = time.time()
 	
 	return [

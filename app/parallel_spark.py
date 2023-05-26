@@ -17,7 +17,7 @@ def compute_b_d(matrix: np.ndarray, d_star: np.ndarray, threshold: float) -> Dic
 	ARGUMENTS:
 		- matrix (np.ndarray): TF-IDF matrix
 		- d_star (np.ndarray)
-		- threshold (flaot):
+		- threshold (flaot)
 	RETURN:
 		- (Dict[int, int]) prefix filter result
 	'''
@@ -115,9 +115,9 @@ def pyspark_APDS(ds_name: str, sampled_dict: Dict[str, str], threshold: float,
 	tfidf_features = vectorizer.fit_transform(list(sampled_dict.values())).toarray() # Get the TF-IDF matrix
 
 	doc_freq = np.sum(tfidf_features > 0, axis=0) # Compute document frequency
-	dec_doc_freq = np.argsort(doc_freq)[::-1] #  Decreasing order of document frequency
+	dec_doc_freq = np.argsort(doc_freq)[::-1] # Decreasing order of document frequency
 
-	# Ordered matrix 
+	# Order the matrix with the index of the decreasing order of document frequency
 	matrix = np.array([row[dec_doc_freq] for row in tfidf_features])
 
 	# Computing the list that will feed into the rdd, list of pairs of (docid, tfidf_list)
